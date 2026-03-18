@@ -1,4 +1,57 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+type ServiceStatus = "active" | "pending" | "disconnected";
+
+function useServiceHealth() {
+  const [apiStatus, setApiStatus] = useState<ServiceStatus>("pending");
+  const [brokerStatus, setBrokerStatus] = useState<ServiceStatus>("pending");
+
+  useEffect(() => {
+    async function checkHealth() {
+      try {
+        const res = await fetch("http://localhost:8321/health", {
+          signal: AbortSignal.timeout(3000),
+        });
+        if (res.ok) {
+          setApiStatus("active");
+          // If API is up, check broker
+          try {
+            const brokerRes = await fetch(
+              "http://localhost:8321/broker/status",
+              { signal: AbortSignal.timeout(3000) }
+            );
+            if (brokerRes.ok) {
+              const data = await brokerRes.json();
+              setBrokerStatus(data.connected ? "active" : "disconnected");
+            } else {
+              setBrokerStatus("disconnected");
+            }
+          } catch {
+            setBrokerStatus("disconnected");
+          }
+        } else {
+          setApiStatus("disconnected");
+          setBrokerStatus("disconnected");
+        }
+      } catch {
+        setApiStatus("disconnected");
+        setBrokerStatus("disconnected");
+      }
+    }
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return { apiStatus, brokerStatus };
+}
+
 export default function Home() {
+  const { apiStatus, brokerStatus } = useServiceHealth();
+
   return (
     <main
       style={{
@@ -60,9 +113,8 @@ export default function Home() {
           }}
         >
           <StatusRow label="Next.js" port="3000" status="active" />
-          <StatusRow label="FastAPI" port="8321" status="pending" />
-          <StatusRow label="IB Relay" port="8765" status="pending" />
-          <StatusRow label="IB Gateway" port="4001" status="disconnected" />
+          <StatusRow label="FastAPI" port="8321" status={apiStatus} />
+          <StatusRow label="Alpaca" port="paper" status={brokerStatus} />
         </div>
       </div>
 
@@ -93,10 +145,8 @@ export default function Home() {
             gap: "var(--space-micro)",
           }}
         >
-          <code>1. Copy .env.example to .env and add API keys</code>
-          <code>2. pip install -r requirements.txt</code>
-          <code>3. cd web &amp;&amp; npm install</code>
-          <code>4. npm run dev</code>
+          <code>1. Create .env files with API keys</code>
+          <code>2. bash start.sh</code>
         </div>
       </div>
     </main>
