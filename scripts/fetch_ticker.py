@@ -1,11 +1,11 @@
 """Ticker validation — verifies a ticker exists and fetches basic info.
 
-Data source priority: IB → Unusual Whales → Yahoo Finance (fallback).
+Data source priority: Yahoo Finance (primary, free).
 """
 
 import sys
 import json
-from clients.uw_client import UWClient
+from clients.yahoo_client import YahooClient
 
 
 def validate_ticker(ticker: str) -> dict | None:
@@ -18,7 +18,10 @@ def validate_ticker(ticker: str) -> dict | None:
         return None
 
     try:
-        client = UWClient()
+        client = YahooClient()
+        if not client.validate_ticker(ticker):
+            return {"ticker": ticker, "valid": False, "error": "Ticker not found"}
+
         info = client.get_stock_info(ticker)
         return {
             "ticker": ticker,

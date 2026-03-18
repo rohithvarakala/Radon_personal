@@ -6,24 +6,23 @@ Every trade must pass three sequential gates. Any gate fails → stop immediatel
 
 **Gate 1 (Convexity):** Potential gain ≥ 2× potential loss; defined-risk structures only (long options, verticals, calendars).
 
-**Gate 2 (Edge):** Specific, data-backed signal that hasn't moved price yet — dark pool accumulation, LEAP IV divergence, cross-asset vol dislocation, or credit-vol regime shifts.
+**Gate 2 (Edge):** Specific, data-backed signal that hasn't moved price yet — IV divergence, cross-asset vol dislocation, unusual options activity, or credit-vol regime shifts.
 
 **Gate 3 (Risk Management):** Fractional Kelly sizing with hard 2.5% bankroll cap per position. No pyramiding into weak signals.
 
 ## Data Source Priority
 
-1. **Interactive Brokers** — real-time quotes, options chains, portfolio state
-2. **Unusual Whales** — dark pool flow, sweeps, options flow, analyst data
-3. **Exa** — company and market research
-4. **Cboe** — COR1M index feeds (official fallback)
-5. **Yahoo Finance** — last-resort fallback
+1. **Yahoo Finance** — options chains, IV data, analyst ratings, price history (free, no API key)
+2. **Alpaca** — paper/live trading, real-time quotes, portfolio state (free paper trading)
+3. **Anthropic Claude** — AI analysis, vision extraction, chat interface
+4. **Exa** — company and market research (optional)
 
 ## Credentials Architecture (Two .env Files — Never Commit)
 
 | File | Loaded by | Contains |
 |------|-----------|----------|
-| `.env` (root) | Python via `python-dotenv` | `MENTHORQ_USER`, `MENTHORQ_PASS` |
-| `web/.env` | Next.js built-in | `ANTHROPIC_API_KEY`, `UW_TOKEN`, `EXA_API_KEY` |
+| `.env` (root) | Python via `python-dotenv` | `ALPACA_API_KEY`, `ALPACA_SECRET_KEY` |
+| `web/.env` | Next.js built-in | `ANTHROPIC_API_KEY`, `EXA_API_KEY` |
 
 ## Market Hours Rule
 
@@ -36,7 +35,7 @@ Market open: 9:30–16:00 ET, Mon–Fri. Check `TZ=America/New_York date +"%A %H
 
 - **TDD:** Failing test first, implementation second, refactor third. Target ≥95% coverage.
 - **Atomic writes:** All portfolio/data writes use temp file + `os.replace()` + SHA-256 checksum.
-- **Ticker key:** Always `"ticker"` in JSON data files, `"symbol"` only for IB contract objects.
+- **Ticker key:** Always `"ticker"` in JSON data files, `"symbol"` only for broker contract objects.
 
 ## 7-Milestone Evaluation Workflow
 
@@ -45,8 +44,8 @@ Market open: 9:30–16:00 ET, Mon–Fri. Check `TZ=America/New_York date +"%A %H
 1B. Seasonality (context only)
 1C. Analyst Ratings (context only)
 1D. News & Catalysts (context only)
-2.  Dark Pool Flow
-3.  Options Flow
+2.  Options Flow (put/call ratio, IV, unusual activity)
+3.  Institutional Signals (short interest, institutional holders)
 3B. OI Changes (REQUIRED)
 4.  Edge Decision (PASS/FAIL — fail = stop)
 5.  Structure (convex, R:R > 2:1)
@@ -61,39 +60,45 @@ Market open: 9:30–16:00 ET, Mon–Fri. Check `TZ=America/New_York date +"%A %H
 - **Analyst Buy %:** ≥70% BULLISH | 50–69% LEAN_BULLISH | 30–49% LEAN_BEARISH | <30% BEARISH
 - **Discovery Score (0–100):** 60–100 Strong | 40–59 Monitor | 20–39 Weak | <20 No signal
 
-## Three-Service Dev Stack
+## Two-Service Dev Stack
 
 ```bash
-npm run dev  # starts all three:
+npm run dev  # starts both:
 ```
 
 | Service | Port | Role |
 |---------|------|------|
 | Next.js | 3000 | Web UI |
-| IB WS relay | 8765 | Real-time price streaming |
-| FastAPI | 8321 | Python script execution |
+| FastAPI | 8321 | Python script execution + broker API |
 
-## IB Client ID Allocation
+## API Endpoints
 
-| Range | Zone | Usage |
-|-------|------|-------|
-| 0–9 | Pool | FastAPI IBPool (sync=0, orders=1, data=2) |
-| 10–19 | Relay | WS relay |
-| 20–49 | Subprocess | Scripts use `client_id="auto"` |
-| 50–69 | Scanners | CRI/VCG rotating pools |
-| 70–89 | Daemons | Fill monitor=70, exit service=71 |
-| 90–99 | CLI | Standalone scripts |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Service status check |
+| GET | `/portfolio` | Current portfolio state |
+| GET | `/watchlist` | Watchlist tickers |
+| POST | `/watchlist/{symbol}` | Add ticker to watchlist |
+| DELETE | `/watchlist/{symbol}` | Remove from watchlist |
+| POST | `/scan` | Batch options flow scan |
+| GET | `/ticker/{symbol}` | Validate ticker + info |
+| GET | `/flow/{symbol}` | Options flow + institutional signals |
+| GET | `/options/{symbol}` | Options chain |
+| GET | `/analyst/{symbol}` | Analyst ratings + targets |
+| GET | `/history/{symbol}` | Price history |
+| POST | `/kelly` | Kelly position sizing |
+| GET | `/broker/status` | Alpaca connection status |
+| GET | `/broker/positions` | Open broker positions |
 
 ## Commands
 
 | Command | Action |
 |---------|--------|
-| `scan` | Watchlist dark pool flow scan |
+| `scan` | Watchlist options flow scan |
 | `discover` | Market-wide options flow |
 | `evaluate [TICKER]` | Full 7-milestone evaluation |
 | `portfolio` | Positions, exposure, capacity |
-| `sync` | Pull live portfolio from IB |
-| `blotter` | Today's fills + P&L |
+| `sync` | Pull live portfolio from Alpaca |
 | `leap-scan [TICKERS]` | LEAP IV mispricing |
 | `garch-convergence [TICKERS]` | Cross-asset GARCH vol divergence |
 | `vcg-scan` | Volatility-credit gap divergence |

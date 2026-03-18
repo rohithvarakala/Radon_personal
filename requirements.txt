@@ -1,7 +1,12 @@
 # Radon Python Dependencies
 
-# Interactive Brokers
-ib_insync>=0.9.86
+# Market Data (free, no API key needed)
+yfinance>=0.2.30
+
+# Broker — Alpaca (free paper trading, no minimum deposit)
+# Note: ib_insync kept as optional for users with IB accounts
+alpaca-py>=0.21.0
+# ib_insync>=0.9.86  # Optional: uncomment if using Interactive Brokers
 
 # HTTP & Networking
 requests>=2.28.0
@@ -18,12 +23,15 @@ python-dotenv>=1.0.0
 fastapi>=0.100.0
 uvicorn[standard]>=0.22.0
 
-# Browser Automation (MenthorQ scraping)
-playwright>=1.40.0
+# Browser Automation (MenthorQ scraping — optional)
+# playwright>=1.40.0
 
 # Math / Statistics
 scipy>=1.10.0
 arch>=6.0.0  # GARCH models
+
+# AI
+anthropic>=0.40.0
 
 # Testing
 pytest>=7.0.0
