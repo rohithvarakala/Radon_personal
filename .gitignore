@@ -1,0 +1,61 @@
+# Environment variables (NEVER commit real keys)
+.env
+web/.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Node
+node_modules/
+.next/
+out/
+web/node_modules/
+web/.next/
+web/out/
+site/node_modules/
+site/.next/
+
+# Runtime data (generated at runtime, not source)
+data/portfolio.json
+data/trade_log.json
+data/watchlist.json
+data/ticker_cache.json
+data/reconciliation.json
+data/seasonality_cache/
+data/menthorq_cache/
+data/price_history_cache/
+data/cri_scheduled/
+data/*.json
+
+# Reports
+reports/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+coverage/
+
+# Build artifacts
+*.log

@@ -1,0 +1,143 @@
+/* Radon Design System — CSS Variables */
+
+:root {
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "Menlo", "Monaco", monospace;
+
+  /* Grid */
+  --space-micro: 4px;
+  --space-base: 8px;
+  --space-gutter: 16px;
+  --space-section: 32px;
+
+  /* Border */
+  --radius-panel: 4px; /* 4px max on panels */
+  --radius-badge: 999px; /* capsule for badges */
+}
+
+/* Dark theme (default) */
+[data-theme="dark"] {
+  --bg-base: #0a0f14;
+  --bg-panel: #0f1519;
+  --bg-panel-raised: #151c22;
+  --bg-hover: #1a2330;
+  --border-dim: #1e293b;
+  --line-grid: #1e293b;
+
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Radon Spectrum — clarity scale, not P&L */
+  --signal-core: #05ad98;
+  --signal-strong: #0fcfb5;
+  --signal-deep: #048a7a;
+  --warn: #f5a623;
+  --fault: #e85d6c;
+  --extreme: #8b5cf6;
+  --dislocation: #d946a8;
+  --neutral: #94a3b8;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg-base: #ffffff;
+  --bg-panel: #ffffff;
+  --bg-panel-raised: #f1f5f9;
+  --bg-hover: #e2e8f0;
+  --border-dim: #e2e8f0;
+  --line-grid: #bbbfbf;
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  --signal-core: #05ad98;
+  --signal-strong: #0fcfb5;
+  --signal-deep: #048a7a;
+  --warn: #f5a623;
+  --fault: #e85d6c;
+  --extreme: #8b5cf6;
+  --dislocation: #d946a8;
+  --neutral: #94a3b8;
+}
+
+/* Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mono for machine data */
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Panel — instrument module aesthetic */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  border-radius: var(--radius-panel);
+  padding: var(--space-gutter);
+}
+
+.panel-raised {
+  background: var(--bg-panel-raised);
+}
+
+/* Signal colors */
+.signal-core { color: var(--signal-core); }
+.signal-strong { color: var(--signal-strong); }
+.signal-deep { color: var(--signal-deep); }
+.warn { color: var(--warn); }
+.fault { color: var(--fault); }
+.extreme { color: var(--extreme); }
+.dislocation { color: var(--dislocation); }
+
+/* Table base */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+th {
+  text-align: left;
+  padding: var(--space-base) var(--space-gutter);
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border-dim);
+}
+
+td {
+  padding: var(--space-base) var(--space-gutter);
+  border-bottom: 1px solid var(--border-dim);
+}
+
+td.last-price-cell {
+  white-space: nowrap;
+}
+
+/* Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-badge);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-mono);
+}

@@ -1,0 +1,130 @@
+export default function Home() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "var(--space-section)",
+        padding: "var(--space-section)",
+      }}
+    >
+      <div style={{ textAlign: "center" }}>
+        <h1
+          style={{
+            fontSize: "2rem",
+            fontWeight: 600,
+            color: "var(--signal-core)",
+            marginBottom: "var(--space-base)",
+          }}
+        >
+          Radon Terminal
+        </h1>
+        <p
+          className="mono"
+          style={{
+            color: "var(--text-secondary)",
+            fontSize: "14px",
+          }}
+        >
+          Market structure reconstruction system
+        </p>
+      </div>
+
+      <div
+        className="panel"
+        style={{
+          maxWidth: 600,
+          width: "100%",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "14px",
+            color: "var(--text-muted)",
+            marginBottom: "var(--space-gutter)",
+            fontWeight: 500,
+          }}
+        >
+          System Status
+        </h2>
+        <div
+          className="mono"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-base)",
+            fontSize: "13px",
+          }}
+        >
+          <StatusRow label="Next.js" port="3000" status="active" />
+          <StatusRow label="FastAPI" port="8321" status="pending" />
+          <StatusRow label="IB Relay" port="8765" status="pending" />
+          <StatusRow label="IB Gateway" port="4001" status="disconnected" />
+        </div>
+      </div>
+
+      <div
+        className="panel"
+        style={{
+          maxWidth: 600,
+          width: "100%",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "14px",
+            color: "var(--text-muted)",
+            marginBottom: "var(--space-gutter)",
+            fontWeight: 500,
+          }}
+        >
+          Quick Start
+        </h2>
+        <div
+          className="mono"
+          style={{
+            fontSize: "13px",
+            color: "var(--text-secondary)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-micro)",
+          }}
+        >
+          <code>1. Copy .env.example to .env and add API keys</code>
+          <code>2. pip install -r requirements.txt</code>
+          <code>3. cd web &amp;&amp; npm install</code>
+          <code>4. npm run dev</code>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function StatusRow({
+  label,
+  port,
+  status,
+}: {
+  label: string;
+  port: string;
+  status: "active" | "pending" | "disconnected";
+}) {
+  const colors = {
+    active: "var(--signal-core)",
+    pending: "var(--warn)",
+    disconnected: "var(--fault)",
+  };
+
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <span>
+        {label}{" "}
+        <span style={{ color: "var(--text-muted)" }}>:{port}</span>
+      </span>
+      <span style={{ color: colors[status] }}>{status}</span>
+    </div>
+  );
+}
