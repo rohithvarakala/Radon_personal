@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import TickerLookup from "@/components/TickerLookup";
+import FlowPanel from "@/components/FlowPanel";
+import WatchlistPanel from "@/components/WatchlistPanel";
 
 type ServiceStatus = "active" | "pending" | "disconnected";
 
@@ -16,7 +19,6 @@ function useServiceHealth() {
         });
         if (res.ok) {
           setApiStatus("active");
-          // If API is up, check broker
           try {
             const brokerRes = await fetch(
               "http://localhost:8321/broker/status",
@@ -51,6 +53,11 @@ function useServiceHealth() {
 
 export default function Home() {
   const { apiStatus, brokerStatus } = useServiceHealth();
+  const [activeTicker, setActiveTicker] = useState<string | null>(null);
+
+  function handleTickerSelect(ticker: string) {
+    setActiveTicker(ticker);
+  }
 
   return (
     <main
@@ -59,11 +66,11 @@ export default function Home() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        gap: "var(--space-section)",
         padding: "var(--space-section)",
+        gap: "var(--space-section)",
       }}
     >
+      {/* Header */}
       <div style={{ textAlign: "center" }}>
         <h1
           style={{
@@ -86,10 +93,11 @@ export default function Home() {
         </p>
       </div>
 
+      {/* System Status */}
       <div
         className="panel"
         style={{
-          maxWidth: 600,
+          maxWidth: 960,
           width: "100%",
         }}
       >
@@ -107,60 +115,77 @@ export default function Home() {
           className="mono"
           style={{
             display: "flex",
-            flexDirection: "column",
-            gap: "var(--space-base)",
+            gap: "var(--space-section)",
             fontSize: "13px",
+            flexWrap: "wrap",
           }}
         >
-          <StatusRow label="Next.js" port="3000" status="active" />
-          <StatusRow label="FastAPI" port="8321" status={apiStatus} />
-          <StatusRow label="Alpaca" port="paper" status={brokerStatus} />
+          <StatusIndicator label="Next.js" port="3000" status="active" />
+          <StatusIndicator label="FastAPI" port="8321" status={apiStatus} />
+          <StatusIndicator label="Alpaca" port="paper" status={brokerStatus} />
         </div>
       </div>
 
+      {/* Dashboard Grid */}
       <div
-        className="panel"
         style={{
-          maxWidth: 600,
+          maxWidth: 960,
           width: "100%",
+          display: "grid",
+          gridTemplateColumns: "1fr 260px",
+          gap: "var(--space-gutter)",
+          alignItems: "start",
         }}
       >
-        <h2
-          style={{
-            fontSize: "14px",
-            color: "var(--text-muted)",
-            marginBottom: "var(--space-gutter)",
-            fontWeight: 500,
-          }}
-        >
-          Quick Start
-        </h2>
+        {/* Main Column */}
         <div
-          className="mono"
           style={{
-            fontSize: "13px",
-            color: "var(--text-secondary)",
             display: "flex",
             flexDirection: "column",
-            gap: "var(--space-micro)",
+            gap: "var(--space-gutter)",
+            minWidth: 0,
           }}
         >
-          <code>1. Create .env files with API keys</code>
-          <code>2. bash start.sh</code>
+          <TickerLookup onTickerSelect={handleTickerSelect} />
+
+          {activeTicker && <FlowPanel symbol={activeTicker} />}
+        </div>
+
+        {/* Sidebar */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "var(--space-gutter)",
+          }}
+        >
+          <WatchlistPanel
+            onTickerSelect={handleTickerSelect}
+            activeTicker={activeTicker}
+          />
         </div>
       </div>
+
+      {/* Responsive: stack columns on narrow viewports */}
+      <style>{`
+        @media (max-width: 720px) {
+          main > div:last-of-type {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
 
-function StatusRow({
+function StatusIndicator({
   label,
   port,
   status,
 }: {
   label: string;
   port: string;
-  status: "active" | "pending" | "disconnected";
+  status: ServiceStatus;
 }) {
   const colors = {
     active: "var(--signal-core)",
@@ -169,12 +194,22 @@ function StatusRow({
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "space-between" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "var(--space-base)" }}>
+      <span
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: colors[status],
+          display: "inline-block",
+          flexShrink: 0,
+        }}
+      />
       <span>
         {label}{" "}
         <span style={{ color: "var(--text-muted)" }}>:{port}</span>
       </span>
-      <span style={{ color: colors[status] }}>{status}</span>
+      <span style={{ color: colors[status], fontSize: "12px" }}>{status}</span>
     </div>
   );
 }
