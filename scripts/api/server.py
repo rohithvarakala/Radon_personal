@@ -36,10 +36,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Radon API", version="0.1.0", lifespan=lifespan)
 
-# CORS — allow Next.js frontend
+# CORS — allow Next.js frontend + AlphaHunt deployment origins
+cors_origins = os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else []
+cors_origins.extend([
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+])
+
+# Also allow any vercel.app subdomain
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=cors_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
